@@ -124,6 +124,7 @@ function makeDeleteButton(noteId, noteElement) {
 	button.type = 'button';
 	button.className = 'delete-btn';
 	button.textContent = 'Delete';
+	button.disabled = pendingRequests > 0;
 	button.addEventListener('click', () => deleteNote(noteId, noteElement));
 	return button;
 }
