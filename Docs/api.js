@@ -13,10 +13,22 @@ async function request(url, options = {}) {
 const loadButton = document.querySelector('#load-btn');
 const statusMessage = document.querySelector('#status');
 const notesList = document.querySelector('#notes-list');
+const noteForm = document.querySelector('#note-form');
+const titleInput = document.querySelector('#title-input');
+const bodyInput = document.querySelector('#body-input');
+const submitButton = document.querySelector('#submit-btn');
+let pendingRequests = 0;
 
 function showStatus(message, kind = '') {
 	statusMessage.textContent = message;
 	statusMessage.className = kind ? `status-${kind}` : '';
+}
+
+function setRequestPending(isPending) {
+	pendingRequests += isPending ? 1 : -1;
+	document.querySelectorAll('button').forEach((button) => {
+		button.disabled = pendingRequests > 0;
+	});
 }
 
 function renderNotes(notes) {
@@ -42,7 +54,7 @@ function renderNotes(notes) {
 }
 
 loadButton.addEventListener('click', async () => {
-	loadButton.disabled = true;
+	setRequestPending(true);
 	showStatus('Loading notes...');
 
 	try {
@@ -57,6 +69,52 @@ loadButton.addEventListener('click', async () => {
 	} catch (error) {
 		showStatus('Sorry, notes could not be loaded. Please try again.', 'error');
 	} finally {
-		loadButton.disabled = false;
+		setRequestPending(false);
+	}
+});
+
+noteForm.addEventListener('submit', async (event) => {
+	event.preventDefault();
+	const title = titleInput.value.trim();
+	const body = bodyInput.value.trim();
+
+	if (!title) {
+		showStatus('Please enter a title for your note.', 'error');
+		titleInput.focus();
+		return;
+	}
+	if (title.length > 100) {
+		showStatus('Titles must be 100 characters or fewer.', 'error');
+		titleInput.focus();
+		return;
+	}
+
+	setRequestPending(true);
+	showStatus('Creating note...');
+	try {
+		const response = await request(API_URL, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json; charset=UTF-8' },
+			body: JSON.stringify({ title, body, userId: 1 }),
+		});
+		const createdNote = await response.json();
+		const emptyState = notesList.querySelector('.empty-state');
+		if (emptyState) {
+			emptyState.remove();
+		}
+		const item = document.createElement('li');
+		item.className = 'note-item';
+		const noteTitle = document.createElement('h3');
+		noteTitle.textContent = createdNote.title;
+		const noteBody = document.createElement('p');
+		noteBody.textContent = createdNote.body;
+		item.append(noteTitle, noteBody);
+		notesList.prepend(item);
+		noteForm.reset();
+		showStatus(`Note created (status ${response.status}, id ${createdNote.id}).`, 'success');
+	} catch (error) {
+		showStatus('Sorry, the note could not be created. Please try again.', 'error');
+	} finally {
+		setRequestPending(false);
 	}
 });
