@@ -48,7 +48,7 @@ function renderNotes(notes) {
 		title.textContent = note.title;
 		const body = document.createElement('p');
 		body.textContent = note.body;
-		item.append(title, body);
+		item.append(title, body, makeDeleteButton(note.id, item));
 		notesList.append(item);
 	}
 }
@@ -108,7 +108,7 @@ noteForm.addEventListener('submit', async (event) => {
 		noteTitle.textContent = createdNote.title;
 		const noteBody = document.createElement('p');
 		noteBody.textContent = createdNote.body;
-		item.append(noteTitle, noteBody);
+		item.append(noteTitle, noteBody, makeDeleteButton(createdNote.id, item));
 		notesList.prepend(item);
 		noteForm.reset();
 		showStatus(`Note created (status ${response.status}, id ${createdNote.id}).`, 'success');
@@ -118,3 +118,32 @@ noteForm.addEventListener('submit', async (event) => {
 		setRequestPending(false);
 	}
 });
+
+function makeDeleteButton(noteId, noteElement) {
+	const button = document.createElement('button');
+	button.type = 'button';
+	button.className = 'delete-btn';
+	button.textContent = 'Delete';
+	button.addEventListener('click', () => deleteNote(noteId, noteElement));
+	return button;
+}
+
+async function deleteNote(noteId, noteElement) {
+	setRequestPending(true);
+	showStatus('Deleting note...');
+	try {
+		const response = await request(`${API_URL}/${encodeURIComponent(noteId)}`, {
+			method: 'DELETE',
+		});
+		// JSONPlaceholder confirms deletes but does not persist them, so remove only from this page.
+		noteElement.remove();
+		if (notesList.children.length === 0) {
+			renderNotes([]);
+		}
+		showStatus(`Note deleted (status ${response.status}).`, 'success');
+	} catch (error) {
+		showStatus('Sorry, the note could not be deleted. Please try again.', 'error');
+	} finally {
+		setRequestPending(false);
+	}
+}
