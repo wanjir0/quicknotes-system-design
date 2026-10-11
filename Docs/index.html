@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>QuickNotes API Client</title>
+	<link rel="stylesheet" href="style.css">
+	<script src="api.js" defer></script>
+</head>
+<body>
+	<main class="app">
+		<header class="page-header">
+			<p class="eyebrow">QuickNotes / API practice</p>
+			<h1>Your notes, in reach.</h1>
+			<p class="intro">A small client for reading and creating notes through an API.</p>
+		</header>
+
+		<section class="composer" aria-labelledby="composer-title">
+			<h2 id="composer-title">Write a note</h2>
+			<form id="note-form">
+				<label for="title-input">Title</label>
+				<input id="title-input" name="title" type="text" maxlength="100" required>
+				<label for="body-input">Note</label>
+				<textarea id="body-input" name="body" rows="4"></textarea>
+				<button id="submit-btn" type="submit">Create note</button>
+			</form>
+		</section>
+
+		<section class="notes-section" aria-labelledby="notes-title">
+			<div class="section-heading">
+				<div>
+					<p class="eyebrow">Your collection</p>
+					<h2 id="notes-title">Notes</h2>
+				</div>
+				<button id="load-btn" class="button-secondary" type="button">Load notes</button>
+			</div>
+			<p id="status" role="status" aria-live="polite"></p>
+			<ul id="notes-list" aria-live="polite"></ul>
+		</section>
+	</main>
+</body>
+</html>
