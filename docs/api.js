@@ -1,6 +1,6 @@
 const API_URL = 'https://jsonplaceholder.typicode.com/posts';
 
-async function request(url, options = {}) {
+async function request(url, options = {}) { //calls fetch and throws if the response is not okay
 	const response = await fetch(url, options);
 	if (!response.ok) {
 		const error = new Error(`Request failed (${response.status}).`);
@@ -136,7 +136,7 @@ async function deleteNote(noteId, noteElement) {
 		const response = await request(`${API_URL}/${encodeURIComponent(noteId)}`, {
 			method: 'DELETE',
 		});
-		// JSONPlaceholder confirms deletes but does not persist them, so remove only from this page.
+		
 		noteElement.remove();
 		if (notesList.children.length === 0) {
 			renderNotes([]);
